@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { Subject } from './entities/subject.entity';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class SubjectsService {
-  create(createSubjectDto: CreateSubjectDto) {
+  constructor(@InjectModel(Subject) private subjectRepo: typeof Subject) {}
+
+  async create(createSubjectDto: CreateSubjectDto) {
     return 'This action adds a new subject';
   }
 
-  findAll() {
+  async findAll() {
     return `This action returns all subjects`;
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} subject`;
   }
 
-  update(id: number, updateSubjectDto: UpdateSubjectDto) {
+  async update(id: number, updateSubjectDto: UpdateSubjectDto) {
     return `This action updates a #${id} subject`;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} subject`;
   }
 }

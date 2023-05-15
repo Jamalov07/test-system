@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateStuffDto } from './dto/create-stuff.dto';
 import { UpdateStuffDto } from './dto/update-stuff.dto';
+import { Stuff } from './entities/stuff.entity';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class StuffsService {
-  create(createStuffDto: CreateStuffDto) {
+  constructor(@InjectModel(Stuff) private stuffRepo: typeof Stuff) {}
+
+  async create(createStuffDto: CreateStuffDto) {
     return 'This action adds a new stuff';
   }
 
-  findAll() {
+  async findAll() {
     return `This action returns all stuffs`;
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} stuff`;
   }
 
-  update(id: number, updateStuffDto: UpdateStuffDto) {
+  async update(id: number, updateStuffDto: UpdateStuffDto) {
     return `This action updates a #${id} stuff`;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} stuff`;
   }
 }
