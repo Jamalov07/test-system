@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTestGroupDto } from './dto/create-test_group.dto';
 import { UpdateTestGroupDto } from './dto/update-test_group.dto';
 import { TestGroup } from './entities/test_group.entity';
@@ -11,22 +11,40 @@ export class TestGroupsService {
   ) {}
 
   async create(createTestGroupDto: CreateTestGroupDto) {
-    return 'This action adds a new testGroup';
+    if (![15, 30, 45].includes(createTestGroupDto.tests_count)) {
+      throw new BadRequestException('only 15, 30, 45 tests in test group');
+    }
+    const newTestGroup = await this.testgroupRepo.create(createTestGroupDto);
+    return newTestGroup;
   }
 
   async findAll() {
-    return `This action returns all testGroups`;
+    const testgroups = await this.testgroupRepo.findAll();
+    return testgroups;
   }
 
   async findOne(id: number) {
-    return `This action returns a #${id} testGroup`;
+    const testgroup = await this.testgroupRepo.findOne({ where: { id } });
+    if (!testgroup) {
+      throw new BadRequestException('Test group not found');
+    }
+    return testgroup;
   }
 
   async update(id: number, updateTestGroupDto: UpdateTestGroupDto) {
-    return `This action updates a #${id} testGroup`;
+    const testgroup = await this.findOne(id);
+    if (updateTestGroupDto.tests_count) {
+      if (![15, 30, 45].includes(updateTestGroupDto.tests_count)) {
+        throw new BadRequestException('only 15, 30, 45 tests in test group');
+      }
+    }
+    await testgroup.update(updateTestGroupDto);
+    return testgroup;
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} testGroup`;
+    const testgroup = await this.findOne(id);
+    await testgroup.destroy();
+    return { message: 'test group deleted' };
   }
 }
