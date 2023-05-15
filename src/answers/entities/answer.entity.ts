@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Question } from '../../questions/entities/question.entity';
 
 interface AnswerAttrs {
   answer: string;
@@ -25,6 +34,9 @@ export class Answer extends Model<Answer, AnswerAttrs> {
   @Column({ type: DataType.BOOLEAN })
   is_true: boolean;
   @ApiProperty({ example: 4, description: 'question id' })
+  @ForeignKey(() => Question)
   @Column({ type: DataType.INTEGER })
   question_id: number;
+  @BelongsTo(() => Question)
+  question: Question;
 }

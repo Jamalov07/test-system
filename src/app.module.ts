@@ -10,6 +10,17 @@ import { AnswersModule } from './answers/answers.module';
 import { StudentsModule } from './students/students.module';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { Answer } from './answers/entities/answer.entity';
+import { Group } from './groups/entities/group.entity';
+import { Question } from './questions/entities/question.entity';
+import { Role } from './roles/entities/role.entity';
+import { Student } from './students/entities/student.entity';
+import { StuffSubject } from './stuff_subjects/entities/stuff_subject.entity';
+import { Stuff } from './stuffs/entities/stuff.entity';
+import { Subject } from './subjects/entities/subject.entity';
+import { TestGroup } from './test_groups/entities/test_group.entity';
+import { TestResultsModule } from './test_results/test_results.module';
+import { TestResult } from './test_results/entities/test_result.entity';
 
 @Module({
   imports: [
@@ -21,7 +32,18 @@ import { SequelizeModule } from '@nestjs/sequelize';
       username: process.env.POSTGRES_USER,
       password: String(process.env.POSTGRES_PASSWORD),
       database: process.env.POSTGRES_DB,
-      models: [],
+      models: [
+        Answer,
+        Group,
+        Question,
+        Role,
+        Student,
+        StuffSubject,
+        Stuff,
+        Subject,
+        TestGroup,
+        TestResult
+      ],
       autoLoadModels: true,
       logging: false,
     }),
@@ -34,6 +56,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
     QuestionsModule,
     AnswersModule,
     StudentsModule,
+    TestResultsModule,
   ],
   controllers: [],
   providers: [],

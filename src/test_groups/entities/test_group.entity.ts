@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Subject } from '../../subjects/entities/subject.entity';
+import { TestResult } from '../../test_results/entities/test_result.entity';
+import { Question } from '../../questions/entities/question.entity';
 
 interface TestGroupAttrs {
   subject_id: number;
@@ -18,10 +29,19 @@ export class TestGroup extends Model<TestGroup, TestGroupAttrs> {
   id: number;
 
   @ApiProperty({ example: 4, description: 'subject id' })
+  @ForeignKey(() => Subject)
   @Column({ type: DataType.INTEGER })
   subject_id: number;
+  @BelongsTo(() => Subject)
+  subject: Subject;
 
   @ApiProperty({ example: 15, description: 'tests count' })
   @Column({ type: DataType.INTEGER })
   tests_count: number;
+
+  @HasMany(() => TestResult)
+  results: TestResult[];
+
+  @HasMany(() => Question)
+  questions: Question[];
 }

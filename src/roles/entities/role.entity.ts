@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { Stuff } from '../../stuffs/entities/stuff.entity';
 
 interface RoleAttrs {
   name: string;
@@ -23,4 +24,7 @@ export class Role extends Model<Role, RoleAttrs> {
   @ApiProperty({ example: 'about admin role', description: 'about role' })
   @Column({ type: DataType.STRING })
   description: string;
+
+  @HasMany(() => Stuff)
+  stuffs: Stuff[];
 }

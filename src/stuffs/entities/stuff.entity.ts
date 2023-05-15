@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Role } from '../../roles/entities/role.entity';
+import { Group } from '../../groups/entities/group.entity';
+import { StuffSubject } from '../../stuff_subjects/entities/stuff_subject.entity';
 
 interface StuffAttrs {
   full_name: string;
@@ -37,6 +48,15 @@ export class Stuff extends Model<Stuff, StuffAttrs> {
   @Column({ type: DataType.STRING })
   password: string;
   @ApiProperty({ example: 2, description: 'Stuff role id' })
+  @ForeignKey(() => Role)
   @Column({ type: DataType.INTEGER })
   role_id: number;
+  @BelongsTo(() => Role)
+  role: Role;
+
+  @HasMany(() => Group)
+  groups: Group[];
+
+  @HasMany(() => StuffSubject)
+  stuff_subjects: StuffSubject[];
 }

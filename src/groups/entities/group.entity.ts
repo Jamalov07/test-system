@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Stuff } from '../../stuffs/entities/stuff.entity';
+import { Student } from '../../students/entities/student.entity';
 
 interface GroupAttrs {
   name: string;
@@ -22,6 +32,12 @@ export class Group extends Model<Group, GroupAttrs> {
   name: string;
 
   @ApiProperty({ example: 4, description: 'stuff id' })
+  @ForeignKey(() => Stuff)
   @Column({ type: DataType.INTEGER })
   stuff_id: number;
+  @BelongsTo(() => Stuff)
+  stuff: Stuff;
+
+  @HasMany(() => Student)
+  students: Student[];
 }
