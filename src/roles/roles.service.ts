@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Role } from './entities/role.entity';
 
 @Injectable()
 export class RolesService {
-  create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
+  constructor(@InjectModel(Role) private roleRepo: typeof Role) {}
+
+  async create(createRoleDto: CreateRoleDto) {
+    const candidate = await this.roleRepo.findOne({
+      where: { name: createRoleDto.name },
+    });
+    if (candidate) {
+      throw new BadRequestException('This role already exists');
+    }
+    const newRole = await this.roleRepo.create(createRoleDto);
+    return newRole;
   }
 
-  findAll() {
-    return `This action returns all roles`;
+  async findAll() {
+    const roles = await this.roleRepo.findAll();
+    return roles;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: number) {
+    const role = await this.roleRepo.findOne({ where: { id } });
+    if (!role) {
+      throw new BadRequestException('Role not found');
+    }
+    return role;
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+  async update(id: number, updateRoleDto: UpdateRoleDto) {
+    const role = await this.findOne(id);
+    if (updateRoleDto.name) {
+      const candidate = await this.roleRepo.findOne({
+        where: { name: updateRoleDto.name },
+      });
+      if (candidate && candidate.id !== id) {
+        throw new BadRequestException('This role already exists');
+      }
+    }
+    await role.update(updateRoleDto);
+    return role;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  async remove(id: number) {
+    const role = await this.findOne(id);
+    await role.destroy();
+    return { message: 'role deleted' };
   }
 }
