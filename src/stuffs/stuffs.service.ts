@@ -3,12 +3,16 @@ import { CreateStuffDto } from './dto/create-stuff.dto';
 import { UpdateStuffDto } from './dto/update-stuff.dto';
 import { Stuff } from './entities/stuff.entity';
 import { InjectModel } from '@nestjs/sequelize';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class StuffsService {
-  constructor(@InjectModel(Stuff) private stuffRepo: typeof Stuff) {}
+  constructor(
+    @InjectModel(Stuff) private stuffRepo: typeof Stuff,
+    private fileService: FilesService,
+  ) {}
 
-  async create(createStuffDto: CreateStuffDto) {
+  async create(createStuffDto: CreateStuffDto, image: any) {
     const candidate1 = await this.stuffRepo.findOne({
       where: {
         phone_number: createStuffDto.phone_number,
@@ -23,7 +27,15 @@ export class StuffsService {
       throw new BadRequestException('student already exists');
     }
 
-    const newStuff = await this.stuffRepo.create(createStuffDto);
+    let fileName: string = '';
+    if (image) {
+      fileName = await this.fileService.createFile(image);
+    }
+
+    const newStuff = await this.stuffRepo.create({
+      ...createStuffDto,
+      image: fileName,
+    });
     return newStuff;
   }
 
@@ -40,7 +52,7 @@ export class StuffsService {
     return stuff;
   }
 
-  async update(id: number, updateStuffDto: UpdateStuffDto) {
+  async update(id: number, updateStuffDto: UpdateStuffDto, image) {
     const stuff = await this.findOne(id);
 
     const candidate1 = await this.stuffRepo.findOne({
@@ -60,12 +72,19 @@ export class StuffsService {
       throw new BadRequestException('stuff already exists');
     }
 
-    await stuff.update(updateStuffDto);
+    let fileName: string = '';
+    if (image) {
+      await this.fileService.deleteFile(stuff.image);
+      fileName = await this.fileService.createFile(image);
+    }
+
+    await stuff.update({ ...updateStuffDto, image: fileName || stuff.image });
     return stuff;
   }
 
   async remove(id: number) {
     const stuff = await this.findOne(id);
+    await this.fileService.deleteFile(stuff.image)
     await stuff.destroy();
     return { message: 'stuff deleted' };
   }

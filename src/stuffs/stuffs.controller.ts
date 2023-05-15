@@ -1,15 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { StuffsService } from './stuffs.service';
 import { CreateStuffDto } from './dto/create-stuff.dto';
 import { UpdateStuffDto } from './dto/update-stuff.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('stuffs')
 export class StuffsController {
   constructor(private readonly stuffsService: StuffsService) {}
 
   @Post()
-  create(@Body() createStuffDto: CreateStuffDto) {
-    return this.stuffsService.create(createStuffDto);
+  @UseInterceptors(FileInterceptor('image'))
+  create(@Body() createStuffDto: CreateStuffDto, @UploadedFile() image: any) {
+    return this.stuffsService.create(createStuffDto, image);
   }
 
   @Get()
@@ -23,8 +35,13 @@ export class StuffsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStuffDto: UpdateStuffDto) {
-    return this.stuffsService.update(+id, updateStuffDto);
+  @UseInterceptors(FileInterceptor('image'))
+  update(
+    @Param('id') id: string,
+    @Body() updateStuffDto: UpdateStuffDto,
+    @UploadedFile() image: any,
+  ) {
+    return this.stuffsService.update(+id, updateStuffDto,image);
   }
 
   @Delete(':id')

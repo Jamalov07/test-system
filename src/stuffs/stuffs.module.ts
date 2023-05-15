@@ -3,10 +3,11 @@ import { StuffsService } from './stuffs.service';
 import { StuffsController } from './stuffs.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Stuff } from './entities/stuff.entity';
+import { FilesModule } from '../files/files.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Stuff])],
+  imports: [FilesModule, SequelizeModule.forFeature([Stuff])],
   controllers: [StuffsController],
-  providers: [StuffsService]
+  providers: [StuffsService],
 })
 export class StuffsModule {}

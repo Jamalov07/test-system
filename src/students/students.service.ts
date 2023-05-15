@@ -3,12 +3,16 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Student } from './entities/student.entity';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class StudentsService {
-  constructor(@InjectModel(Student) private studentRepo: typeof Student) {}
+  constructor(
+    @InjectModel(Student) private studentRepo: typeof Student,
+    private fileService: FilesService,
+  ) {}
 
-  async create(createStudentDto: CreateStudentDto) {
+  async create(createStudentDto: CreateStudentDto, image: any) {
     const candidate1 = await this.studentRepo.findOne({
       where: {
         phone_number: createStudentDto.phone_number,
@@ -23,7 +27,14 @@ export class StudentsService {
       throw new BadRequestException('student already exists');
     }
 
-    const newStudent = await this.studentRepo.create(createStudentDto);
+    let fileName: string = '';
+    if (image) {
+      fileName = await this.fileService.createFile(image);
+    }
+    const newStudent = await this.studentRepo.create({
+      ...createStudentDto,
+      image: fileName,
+    });
     return newStudent;
   }
 
@@ -40,7 +51,7 @@ export class StudentsService {
     return student;
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto) {
+  async update(id: number, updateStudentDto: UpdateStudentDto, image: any) {
     const student = await this.findOne(id);
 
     const candidate1 = await this.studentRepo.findOne({
@@ -59,13 +70,22 @@ export class StudentsService {
     ) {
       throw new BadRequestException('student already exists');
     }
+    let fileName: any = '';
+    if (image) {
+      await this.fileService.deleteFile(student.image);
+      fileName = await this.fileService.createFile(image);
+    }
 
-    await student.update(updateStudentDto);
+    await student.update({
+      ...updateStudentDto,
+      image: fileName || student.image,
+    });
     return student;
   }
 
   async remove(id: number) {
     const student = await this.findOne(id);
+    await this.fileService.deleteFile(student.image);
     await student.destroy();
     return { message: 'student deleted' };
   }
