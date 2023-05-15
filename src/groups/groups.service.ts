@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -9,22 +9,46 @@ export class GroupsService {
   constructor(@InjectModel(Group) private groupRepo: typeof Group) {}
 
   async create(createGroupDto: CreateGroupDto) {
-    return 'This action adds a new group';
+    const candidate = await this.groupRepo.findOne({
+      where: { name: createGroupDto.name },
+    });
+    if (candidate) {
+      throw new BadRequestException('This group already exists');
+    }
+    const newGroup = await this.groupRepo.create(createGroupDto);
+    return newGroup;
   }
 
   async findAll() {
-    return `This action returns all groups`;
+    const groups = await this.groupRepo.findAll();
+    return groups;
   }
 
   async findOne(id: number) {
-    return `This action returns a #${id} group`;
+    const group = await this.groupRepo.findOne({ where: { id } });
+    if (!group) {
+      throw new BadRequestException('Group not found');
+    }
+    return group;
   }
 
   async update(id: number, updateGroupDto: UpdateGroupDto) {
-    return `This action updates a #${id} group`;
+    const group = await this.findOne(id);
+    if (updateGroupDto.name) {
+      const candidate = await this.groupRepo.findOne({
+        where: { name: updateGroupDto.name },
+      });
+      if (candidate && candidate.id !== id) {
+        throw new BadRequestException('This group already exists');
+      }
+    }
+    await group.update(updateGroupDto);
+    return group;
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} group`;
+    const group = await this.findOne(id);
+    await group.destroy();
+    return { message: 'group deleted' };
   }
 }
