@@ -4,9 +4,14 @@ import { StuffsController } from './stuffs.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Stuff } from './entities/stuff.entity';
 import { FilesModule } from '../files/files.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [FilesModule, SequelizeModule.forFeature([Stuff])],
+  imports: [
+    JwtModule.register({}),
+    FilesModule,
+    SequelizeModule.forFeature([Stuff]),
+  ],
   controllers: [StuffsController],
   providers: [StuffsService],
 })
