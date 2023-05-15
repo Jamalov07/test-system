@@ -6,16 +6,27 @@ import { InjectModel } from '@nestjs/sequelize';
 import { FilesService } from '../files/files.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Role } from '../roles/entities/role.entity';
 
 @Injectable()
 export class StuffsService {
   constructor(
     @InjectModel(Stuff) private stuffRepo: typeof Stuff,
+    @InjectModel(Role) private roleRepo: typeof Role,
     private fileService: FilesService,
     private jwtService: JwtService,
   ) {}
 
-  async create(createStuffDto: CreateStuffDto, image: any) {
+  async create(createStuffDto: CreateStuffDto, image: any, command: string) {
+    let role_id = createStuffDto.role_id;
+    if (command === 'first') {
+      const newRole = await this.roleRepo.create({
+        name: 'SUPERADMIN',
+        description: 'CREATOR',
+      });
+      role_id = newRole.id;
+    }
+
     const candidate1 = await this.stuffRepo.findOne({
       where: {
         phone_number: createStuffDto.phone_number,
@@ -40,6 +51,7 @@ export class StuffsService {
       ...createStuffDto,
       image: fileName,
       password: hashed,
+      role_id: role_id,
     });
 
     return newStuff;

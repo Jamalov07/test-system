@@ -34,9 +34,12 @@ export class StudentsService {
     if (image) {
       fileName = await this.fileService.createFile(image);
     }
+
+    const hashed = await bcrypt.hash(createStudentDto.password, 7);
     const newStudent = await this.studentRepo.create({
       ...createStudentDto,
       image: fileName,
+      password: hashed,
     });
     return newStudent;
   }
@@ -73,15 +76,21 @@ export class StudentsService {
     ) {
       throw new BadRequestException('student already exists');
     }
-    let fileName: any = '';
+    let fileName: any = student.image;
     if (image) {
       await this.fileService.deleteFile(student.image);
       fileName = await this.fileService.createFile(image);
     }
 
+    let password = student.password;
+    if (updateStudentDto.password) {
+      password = await bcrypt.hash(updateStudentDto.password, 7);
+    }
+
     await student.update({
       ...updateStudentDto,
-      image: fileName || student.image,
+      image: fileName,
+      password: password,
     });
     return student;
   }

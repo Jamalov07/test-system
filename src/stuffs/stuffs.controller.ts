@@ -13,6 +13,8 @@ import { StuffsService } from './stuffs.service';
 import { CreateStuffDto } from './dto/create-stuff.dto';
 import { UpdateStuffDto } from './dto/update-stuff.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Roles } from '../decorators/roles.decorator';
+import { PermissionRoles } from '../decorators/roles_org.decorator';
 
 @Controller('stuffs')
 export class StuffsController {
@@ -20,12 +22,16 @@ export class StuffsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
-  create(@Body() createStuffDto: CreateStuffDto, @UploadedFile() image: any) {
-    return this.stuffsService.create(createStuffDto, image);
+  create(
+    @Body() createStuffDto: CreateStuffDto,
+    @UploadedFile() image: any,
+    @Roles(['SUPERADMIN', 'ADMIN']) command: string,
+  ) {
+    return this.stuffsService.create(createStuffDto, image, command);
   }
 
   @Get()
-  findAll() {
+  findAll(@PermissionRoles(['SUPERADMIN', 'ADMIN']) str: string) {
     return this.stuffsService.findAll();
   }
 
@@ -41,7 +47,7 @@ export class StuffsController {
     @Body() updateStuffDto: UpdateStuffDto,
     @UploadedFile() image: any,
   ) {
-    return this.stuffsService.update(+id, updateStuffDto,image);
+    return this.stuffsService.update(+id, updateStuffDto, image);
   }
 
   @Delete(':id')
