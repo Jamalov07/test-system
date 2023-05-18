@@ -13,7 +13,6 @@ const start = async () => {
     app.useGlobalFilters(new AllExceptionsFilter(adapterHost));
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe());
-
     const config = new DocumentBuilder()
       .setTitle('TEST')
       .setDescription('test system')
