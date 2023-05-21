@@ -13,6 +13,7 @@ export class StuffSubjectsService {
   async create(createStuffSubjectDto: CreateStuffSubjectDto) {
     const candidate = await this.stuffsubjectRepo.findOne({
       where: { ...createStuffSubjectDto },
+      include: { all: true, nested: true }
     });
     if (candidate) {
       throw new BadRequestException(
@@ -26,12 +27,12 @@ export class StuffSubjectsService {
   }
 
   async findAll() {
-    const stuffSubjects = await this.stuffsubjectRepo.findAll();
+    const stuffSubjects = await this.stuffsubjectRepo.findAll({ include: { all: true, nested: true }});
     return stuffSubjects;
   }
 
   async findOne(id: number) {
-    const stuffsubject = await this.stuffsubjectRepo.findOne({ where: { id } });
+    const stuffsubject = await this.stuffsubjectRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!stuffsubject) {
       throw new BadRequestException('stuff subject not found');
     }
@@ -45,6 +46,7 @@ export class StuffSubjectsService {
         stuff_id: updateStuffSubjectDto.stuff_id || stuffsubject.stuff_id,
         subject_id: updateStuffSubjectDto.subject_id || stuffsubject.subject_id,
       },
+      include: { all: true, nested: true }
     });
     if (candidate && candidate.id !== id) {
       throw new BadRequestException(

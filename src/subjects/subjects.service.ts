@@ -31,12 +31,12 @@ export class SubjectsService {
   }
 
   async findAll() {
-    const subjects = await this.subjectRepo.findAll();
+    const subjects = await this.subjectRepo.findAll({ include: { all: true, nested: true }});
     return subjects;
   }
 
   async findOne(id: number) {
-    const subject = await this.subjectRepo.findOne({ where: { id } });
+    const subject = await this.subjectRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!subject) {
       throw new BadRequestException('Subject not found');
     }

@@ -11,6 +11,7 @@ export class GroupsService {
   async create(createGroupDto: CreateGroupDto) {
     const candidate = await this.groupRepo.findOne({
       where: { name: createGroupDto.name },
+      include: { all: true, nested: true }
     });
     if (candidate) {
       throw new BadRequestException('This group already exists');
@@ -20,12 +21,12 @@ export class GroupsService {
   }
 
   async findAll() {
-    const groups = await this.groupRepo.findAll();
+    const groups = await this.groupRepo.findAll({ include: { all: true, nested: true }});
     return groups;
   }
 
   async findOne(id: number) {
-    const group = await this.groupRepo.findOne({ where: { id } });
+    const group = await this.groupRepo.findOne({ where: { id } , include: { all: true, nested: true }});
     if (!group) {
       throw new BadRequestException('Group not found');
     }
@@ -37,6 +38,7 @@ export class GroupsService {
     if (updateGroupDto.name) {
       const candidate = await this.groupRepo.findOne({
         where: { name: updateGroupDto.name },
+        include: { all: true, nested: true }
       });
       if (candidate && candidate.id !== id) {
         throw new BadRequestException('This group already exists');

@@ -14,6 +14,7 @@ export class AnswersService {
         question_id: createAnswerDto.question_id,
         answer: createAnswerDto.answer,
       },
+      include: { all: true, nested: true }
     });
     if (candidate) {
       throw new BadRequestException(
@@ -26,12 +27,12 @@ export class AnswersService {
   }
 
   async findAll() {
-    const answers = await this.answerRepo.findAll();
+    const answers = await this.answerRepo.findAll({ include: { all: true, nested: true }});
     return answers;
   }
 
   async findOne(id: number) {
-    const answer = await this.answerRepo.findOne({ where: { id } });
+    const answer = await this.answerRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!answer) {
       throw new BadRequestException('Answer not found');
     }
@@ -45,6 +46,7 @@ export class AnswersService {
         question_id: updateAnswerDto.question_id || answer.question_id,
         answer: updateAnswerDto.answer || answer.answer,
       },
+      include: { all: true, nested: true }
     });
     if (candidate && candidate.id !== id) {
       throw new BadRequestException(

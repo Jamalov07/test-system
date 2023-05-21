@@ -11,6 +11,7 @@ export class RolesService {
   async create(createRoleDto: CreateRoleDto) {
     const candidate = await this.roleRepo.findOne({
       where: { name: createRoleDto.name },
+      include: { all: true, nested: true }
     });
     if (candidate) {
       throw new BadRequestException('This role already exists');
@@ -20,12 +21,12 @@ export class RolesService {
   }
 
   async findAll() {
-    const roles = await this.roleRepo.findAll();
+    const roles = await this.roleRepo.findAll({ include: { all: true, nested: true }});
     return roles;
   }
 
   async findOne(id: number) {
-    const role = await this.roleRepo.findOne({ where: { id } });
+    const role = await this.roleRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!role) {
       throw new BadRequestException('Role not found');
     }
@@ -37,6 +38,7 @@ export class RolesService {
     if (updateRoleDto.name) {
       const candidate = await this.roleRepo.findOne({
         where: { name: updateRoleDto.name },
+        include: { all: true, nested: true }
       });
       if (candidate && candidate.id !== id) {
         throw new BadRequestException('This role already exists');

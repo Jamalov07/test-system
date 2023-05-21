@@ -19,12 +19,17 @@ export class TestGroupsService {
   }
 
   async findAll() {
-    const testgroups = await this.testgroupRepo.findAll();
+    const testgroups = await this.testgroupRepo.findAll({
+      include: { all: true, nested: true },
+    });
     return testgroups;
   }
 
   async findOne(id: number) {
-    const testgroup = await this.testgroupRepo.findOne({ where: { id } });
+    const testgroup = await this.testgroupRepo.findOne({
+      where: { id },
+      include: { all: true, nested: true },
+    });
     if (!testgroup) {
       throw new BadRequestException('Test group not found');
     }

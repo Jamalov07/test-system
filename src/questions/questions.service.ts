@@ -14,6 +14,7 @@ export class QuestionsService {
         question: createQuestionDto.question,
         test_group_id: createQuestionDto.test_group_id,
       },
+      include: { all: true, nested: true }
     });
     if (candidate) {
       throw new BadRequestException('Question already exists');
@@ -24,12 +25,12 @@ export class QuestionsService {
   }
 
   async findAll() {
-    const quetions = await this.questionRepo.findAll();
+    const quetions = await this.questionRepo.findAll({ include: { all: true, nested: true }});
     return quetions;
   }
 
   async findOne(id: number) {
-    const question = await this.questionRepo.findOne({ where: { id } });
+    const question = await this.questionRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!question) {
       throw new BadRequestException('Question not found');
     }
@@ -44,6 +45,7 @@ export class QuestionsService {
         test_group_id:
           updateQuestionDto.test_group_id || question.test_group_id,
       },
+      include: { all: true, nested: true }
     });
     if (candidate && candidate.id !== id) {
       throw new BadRequestException('Question already exists');

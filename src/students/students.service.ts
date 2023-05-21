@@ -45,12 +45,12 @@ export class StudentsService {
   }
 
   async findAll() {
-    const students = await this.studentRepo.findAll();
+    const students = await this.studentRepo.findAll({ include: { all: true, nested: true }});
     return students;
   }
 
   async findOne(id: number) {
-    const student = await this.studentRepo.findOne({ where: { id } });
+    const student = await this.studentRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!student) {
       throw new BadRequestException('Student not found');
     }
@@ -106,7 +106,7 @@ export class StudentsService {
     const { username, password } = authBody;
     const student = await this.studentRepo.findOne({
       where: { username },
-      include: { all: true },
+      include: { all: true, nested: true }
     });
     if (!student) {
       throw new BadRequestException('Incorrect username');
@@ -152,7 +152,7 @@ export class StudentsService {
         if (data.id) {
           const student = await this.studentRepo.findOne({
             where: { id: data.id },
-            include: { all: true },
+            include: { all: true, nested: true }
           });
           if (student) {
             return {

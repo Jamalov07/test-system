@@ -16,12 +16,17 @@ export class TestResultsService {
   }
 
   async findAll() {
-    const testresults = await this.testresultRepo.findAll();
+    const testresults = await this.testresultRepo.findAll({
+      include: { all: true, nested: true },
+    });
     return testresults;
   }
 
   async findOne(id: number) {
-    const testresult = await this.testresultRepo.findOne({ where: { id } });
+    const testresult = await this.testresultRepo.findOne({
+      where: { id },
+      include: { all: true, nested: true },
+    });
     if (!testresult) {
       throw new BadRequestException('Test result not found');
     }
@@ -37,6 +42,6 @@ export class TestResultsService {
   async remove(id: number) {
     const testresult = await this.findOne(id);
     await testresult.destroy();
-    return {message:"test result deleted"}
+    return { message: 'test result deleted' };
   }
 }

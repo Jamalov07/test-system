@@ -58,12 +58,12 @@ export class StuffsService {
   }
 
   async findAll() {
-    const stuffs = await this.stuffRepo.findAll();
+    const stuffs = await this.stuffRepo.findAll({ include: { all: true, nested: true }});
     return stuffs;
   }
 
   async findOne(id: number) {
-    const stuff = await this.stuffRepo.findOne({ where: { id } });
+    const stuff = await this.stuffRepo.findOne({ where: { id }, include: { all: true, nested: true } });
     if (!stuff) {
       throw new BadRequestException('stuff not found');
     }
@@ -120,7 +120,7 @@ export class StuffsService {
     const { username, password } = authBody;
     const stuff = await this.stuffRepo.findOne({
       where: { username },
-      include: { all: true },
+      include: { all: true, nested: true }
     });
     if (!stuff) {
       throw new BadRequestException('Incorrect username');
@@ -172,7 +172,7 @@ export class StuffsService {
         if (data.id && data.role_id) {
           const stuff = await this.stuffRepo.findOne({
             where: { id: data.id },
-            include: { all: true },
+            include: { all: true, nested: true }
           });
           if (stuff) {
             return {
