@@ -8,7 +8,6 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Role } from '../../roles/entities/role.entity';
 import { Group } from '../../groups/entities/group.entity';
 import { StuffSubject } from '../../stuff_subjects/entities/stuff_subject.entity';
 
@@ -48,11 +47,11 @@ export class Stuff extends Model<Stuff, StuffAttrs> {
   @Column({ type: DataType.STRING })
   password: string;
   @ApiProperty({ example: 2, description: 'Stuff role id' })
-  @ForeignKey(() => Role)
   @Column({ type: DataType.INTEGER })
   role_id: number;
-  @BelongsTo(() => Role)
-  role: Role;
+  @ApiProperty({ example: 'token21312jnwefa', description: 'refresh_token' })
+  @Column({ type: DataType.STRING })
+  token: string;
 
   @HasMany(() => Group)
   groups: Group[];

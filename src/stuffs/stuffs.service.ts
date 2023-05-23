@@ -6,25 +6,23 @@ import { InjectModel } from '@nestjs/sequelize';
 import { FilesService } from '../files/files.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { Role } from '../roles/entities/role.entity';
 import { Op } from 'sequelize';
+import { LoginStuffDto } from './dto/loginStuff.dto';
 
 @Injectable()
 export class StuffsService {
   constructor(
     @InjectModel(Stuff) private stuffRepo: typeof Stuff,
-    @InjectModel(Role) private roleRepo: typeof Role,
     private fileService: FilesService,
     private jwtService: JwtService,
   ) {}
 
   async create(createStuffDto: CreateStuffDto) {
-    let role_id = createStuffDto.role_id;
-
+    const phn = createStuffDto.phone_number || "";
     const candidate = await this.stuffRepo.findOne({
       where: {
         [Op.or]: [
-          { phone_number: createStuffDto.phone_number },
+          { phone_number: phn },
           { username: createStuffDto.username },
         ],
       },
@@ -38,7 +36,6 @@ export class StuffsService {
     const newStuff = await this.stuffRepo.create({
       ...createStuffDto,
       password: hashed,
-      role_id: role_id,
     });
 
     return newStuff;
@@ -59,20 +56,18 @@ export class StuffsService {
 
   async update(id: number, updateStuffDto: UpdateStuffDto) {
     const stuff = await this.findOne(id);
-
-    const candidate1 = await this.stuffRepo.findOne({
-      where: {
-        phone_number: updateStuffDto.phone_number || stuff.phone_number,
-      },
-    });
-    const candidate2 = await this.stuffRepo.findOne({
-      where: {
-        username: updateStuffDto.username || stuff.username,
-      },
-    });
+    const usern = updateStuffDto.username || "";
+    const phn = updateStuffDto.phone_number || "";
+    const candidate = await this.stuffRepo.findOne({
+      where:{
+        [Op.or] : [
+          {phone_number: usern},
+          {username: phn}
+        ]
+      }
+    })
     if (
-      (candidate1 && candidate1.id !== id) ||
-      (candidate2 && candidate2.id !== id)
+      (candidate && candidate.id !== id)
     ) {
       throw new BadRequestException('stuff already exists');
     }
@@ -82,24 +77,25 @@ export class StuffsService {
     if (updateStuffDto.password) {
       password = await bcrypt.hash(updateStuffDto.password, 7);
     }
-
     await stuff.update({
       ...updateStuffDto,
-      image: updateStuffDto.image,
       password: password,
     });
+    await stuff.save()
     return stuff;
   }
 
   async remove(id: number) {
-    const stuff = await this.findOne(id);
-    await this.fileService.deleteFile(stuff.image);
-    await stuff.destroy();
-    return { message: 'stuff deleted' };
+    await this.stuffRepo.destroy({
+      where:{
+        id:id
+      }
+    })
+    return { status:200, message: 'Successfully deleted' };
   }
 
-  async login(authBody: { username: string; password: string }) {
-    const { username, password } = authBody;
+  async login(loginStuffDto: LoginStuffDto) {
+    const { username, password } = loginStuffDto;
     const stuff = await this.stuffRepo.findOne({
       where: { username },
       include: { all: true, nested: true }
@@ -115,17 +111,22 @@ export class StuffsService {
     const tokens = await this.getTokens(
       stuff.id,
       stuff.role_id,
-      stuff.role.name,
     );
-
-    return { stuff, tokens };
+    stuff.token = tokens.refresh_token;
+    await stuff.save();
+    const resp = {
+      status:200,
+      stuff_id: stuff.id,
+      access_token: tokens.access_token
+    }
+    console.log(resp)
+    return resp;
   }
 
-  async getTokens(id: number, role_id: number, role_name: string) {
+  async getTokens(id: number, role_id: number) {
     const jwtPayload = {
       id: id,
-      role_id: role_id,
-      role_name: role_name,
+      role_id: role_id
     };
 
     const [accessToken, refreshToken] = await Promise.all([

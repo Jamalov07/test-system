@@ -3,7 +3,7 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateStuffDto {
   @ApiProperty({ example: 'AAA', description: 'full name' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   full_name: string;
   @ApiProperty({ example: 'link', description: 'image' })
@@ -11,7 +11,7 @@ export class CreateStuffDto {
   @IsString()
   image: string;
   @ApiProperty({ example: '+99890 001 02 03', description: 'phone number' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   phone_number: string;
   @ApiProperty({ example: 'Stuff11', description: 'username' })
@@ -22,8 +22,8 @@ export class CreateStuffDto {
   @IsNotEmpty()
   @IsString()
   password: string;
-  @ApiProperty({ example: 2, description: 'Stuff role id' })
-  @IsOptional()
+  @ApiProperty({ example: '2', description: 'Stuff role id' })
+  @IsNotEmpty()
   @IsNumber()
   role_id: number;
 }

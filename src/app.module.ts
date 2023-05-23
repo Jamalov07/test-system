@@ -5,7 +5,6 @@ import { StuffsModule } from './stuffs/stuffs.module';
 import { GroupsModule } from './groups/groups.module';
 import { StuffSubjectsModule } from './stuff_subjects/stuff_subjects.module';
 import { TestGroupsModule } from './test_groups/test_groups.module';
-import { RolesModule } from './roles/roles.module';
 import { QuestionsModule } from './questions/questions.module';
 import { AnswersModule } from './answers/answers.module';
 import { StudentsModule } from './students/students.module';
@@ -14,7 +13,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Answer } from './answers/entities/answer.entity';
 import { Group } from './groups/entities/group.entity';
 import { Question } from './questions/entities/question.entity';
-import { Role } from './roles/entities/role.entity';
 import { Student } from './students/entities/student.entity';
 import { StuffSubject } from './stuff_subjects/entities/stuff_subject.entity';
 import { Stuff } from './stuffs/entities/stuff.entity';
@@ -41,7 +39,6 @@ import {ServeStaticModule} from '@nestjs/serve-static'
         Answer,
         Group,
         Question,
-        Role,
         Student,
         StuffSubject,
         Stuff,
@@ -57,7 +54,6 @@ import {ServeStaticModule} from '@nestjs/serve-static'
     GroupsModule,
     StuffSubjectsModule,
     TestGroupsModule,
-    RolesModule,
     QuestionsModule,
     AnswersModule,
     StudentsModule,
