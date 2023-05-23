@@ -6,6 +6,7 @@ import { Student } from './entities/student.entity';
 import { FilesService } from '../files/files.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class StudentsService {
@@ -15,33 +16,30 @@ export class StudentsService {
     private jwtService: JwtService,
   ) {}
 
-  async create(createStudentDto: CreateStudentDto, image: any) {
+async create(createStudentDto: CreateStudentDto,) {
     const candidate1 = await this.studentRepo.findOne({
-      where: {
-        phone_number: createStudentDto.phone_number,
-      },
-    });
-    const candidate2 = await this.studentRepo.findOne({
-      where: {
-        username: createStudentDto.username,
-      },
-    });
-    if (candidate1 || candidate2) {
+      where:{
+        [Op.or]: [
+          { phone_number: createStudentDto.phone_number },
+          { username: createStudentDto.username },
+        ],
+      }
+    })
+    if (candidate1) {
       throw new BadRequestException('student already exists');
-    }
-
-    let fileName: string = '';
-    if (image) {
-      fileName = await this.fileService.createFile(image);
     }
 
     const hashed = await bcrypt.hash(createStudentDto.password, 7);
     const newStudent = await this.studentRepo.create({
       ...createStudentDto,
-      image: fileName,
       password: hashed,
     });
-    return newStudent;
+    const tokens = await this.getTokens(newStudent.id,4);
+    const resp = {
+      data:newStudent,
+      access_token:tokens.access_token
+    }
+    return resp;
   }
 
   async findAll() {
@@ -57,31 +55,22 @@ export class StudentsService {
     return student;
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto, image: any) {
+  async update(id: number, updateStudentDto: UpdateStudentDto) {
     const student = await this.findOne(id);
 
     const candidate1 = await this.studentRepo.findOne({
-      where: {
-        phone_number: updateStudentDto.phone_number || student.phone_number,
-      },
-    });
-    const candidate2 = await this.studentRepo.findOne({
-      where: {
-        username: updateStudentDto.username || student.username,
-      },
+      where:{
+        [Op.or]:[
+          {phone_number:updateStudentDto.phone_number || student.phone_number},
+          {username: updateStudentDto.username || student.username}
+        ]
+      }
     });
     if (
-      (candidate1 && candidate1.id !== id) ||
-      (candidate2 && candidate2.id !== id)
+      (candidate1 && candidate1.id !== id)
     ) {
       throw new BadRequestException('student already exists');
     }
-    let fileName: any = student.image;
-    if (image) {
-      await this.fileService.deleteFile(student.image);
-      fileName = await this.fileService.createFile(image);
-    }
-
     let password = student.password;
     if (updateStudentDto.password) {
       password = await bcrypt.hash(updateStudentDto.password, 7);
@@ -89,41 +78,25 @@ export class StudentsService {
 
     await student.update({
       ...updateStudentDto,
-      image: fileName,
       password: password,
     });
     return student;
   }
 
   async remove(id: number) {
-    const student = await this.findOne(id);
-    await this.fileService.deleteFile(student.image);
-    await student.destroy();
+    const student = await this.studentRepo.destroy({
+      where:{
+        id: id
+      }
+    })
     return { message: 'student deleted' };
   }
 
-  async login(authBody: { username: string; password: string }) {
-    const { username, password } = authBody;
-    const student = await this.studentRepo.findOne({
-      where: { username },
-      include: { all: true, nested: true }
-    });
-    if (!student) {
-      throw new BadRequestException('Incorrect username');
-    }
-    const correct_password = await bcrypt.compare(password, student.password);
-    if (!correct_password) {
-      throw new BadRequestException('Incorrect password');
-    }
 
-    const tokens = await this.getTokens(student.id);
-
-    return { student, tokens };
-  }
-
-  async getTokens(id: number) {
+  async getTokens(id: number,role_id:number) {
     const jwtPayload = {
       id: id,
+      role_id: role_id
     };
 
     const [accessToken, refreshToken] = await Promise.all([
