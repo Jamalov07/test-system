@@ -7,6 +7,7 @@ import { FilesService } from '../files/files.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { Role } from '../roles/entities/role.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class StuffsService {
@@ -17,39 +18,25 @@ export class StuffsService {
     private jwtService: JwtService,
   ) {}
 
-  async create(createStuffDto: CreateStuffDto, image: any, command: string) {
+  async create(createStuffDto: CreateStuffDto) {
     let role_id = createStuffDto.role_id;
-    if (command === 'first') {
-      const newRole = await this.roleRepo.create({
-        name: 'SUPERADMIN',
-        description: 'CREATOR',
-      });
-      role_id = newRole.id;
-    }
 
-    const candidate1 = await this.stuffRepo.findOne({
+    const candidate = await this.stuffRepo.findOne({
       where: {
-        phone_number: createStuffDto.phone_number,
+        [Op.or]: [
+          { phone_number: createStuffDto.phone_number },
+          { username: createStuffDto.username },
+        ],
       },
     });
-    const candidate2 = await this.stuffRepo.findOne({
-      where: {
-        username: createStuffDto.username,
-      },
-    });
-    if (candidate1 || candidate2) {
-      throw new BadRequestException('student already exists');
+    if (candidate) {
+      throw new BadRequestException('Stuff already exists');
     }
 
-    let fileName: string = '';
-    if (image) {
-      fileName = await this.fileService.createFile(image);
-    }
     const hashed = await bcrypt.hash(createStuffDto.password, 7);
 
     const newStuff = await this.stuffRepo.create({
       ...createStuffDto,
-      image: fileName,
       password: hashed,
       role_id: role_id,
     });
@@ -70,7 +57,7 @@ export class StuffsService {
     return stuff;
   }
 
-  async update(id: number, updateStuffDto: UpdateStuffDto, image) {
+  async update(id: number, updateStuffDto: UpdateStuffDto) {
     const stuff = await this.findOne(id);
 
     const candidate1 = await this.stuffRepo.findOne({
@@ -90,11 +77,6 @@ export class StuffsService {
       throw new BadRequestException('stuff already exists');
     }
 
-    let fileName: string = stuff.image;
-    if (image) {
-      await this.fileService.deleteFile(stuff.image);
-      fileName = await this.fileService.createFile(image);
-    }
 
     let password = stuff.password;
     if (updateStuffDto.password) {
@@ -103,7 +85,7 @@ export class StuffsService {
 
     await stuff.update({
       ...updateStuffDto,
-      image: fileName,
+      image: updateStuffDto.image,
       password: password,
     });
     return stuff;

@@ -21,17 +21,14 @@ export class StuffsController {
   constructor(private readonly stuffsService: StuffsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
   create(
     @Body() createStuffDto: CreateStuffDto,
-    @UploadedFile() image: any,
-    @Roles(['SUPERADMIN', 'ADMIN']) command: string,
   ) {
-    return this.stuffsService.create(createStuffDto, image, command);
+    return this.stuffsService.create(createStuffDto);
   }
 
   @Get()
-  findAll(@PermissionRoles(['SUPERADMIN', 'ADMIN']) str: string) {
+  findAll() {
     return this.stuffsService.findAll();
   }
 
@@ -41,13 +38,11 @@ export class StuffsController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id') id: string,
     @Body() updateStuffDto: UpdateStuffDto,
-    @UploadedFile() image: any,
   ) {
-    return this.stuffsService.update(+id, updateStuffDto, image);
+    return this.stuffsService.update(+id, updateStuffDto);
   }
 
   @Delete(':id')

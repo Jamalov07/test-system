@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { resolve } from 'path';
 import { SubjectsModule } from './subjects/subjects.module';
 import { StuffsModule } from './stuffs/stuffs.module';
 import { GroupsModule } from './groups/groups.module';
@@ -21,10 +22,14 @@ import { Subject } from './subjects/entities/subject.entity';
 import { TestGroup } from './test_groups/entities/test_group.entity';
 import { TestResultsModule } from './test_results/test_results.module';
 import { TestResult } from './test_results/entities/test_result.entity';
+import {ServeStaticModule} from '@nestjs/serve-static'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: `.env`, isGlobal: true }),
+    ServeStaticModule.forRoot({
+      rootPath: resolve(__dirname,'static')
+    }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.POSTGRES_HOST,

@@ -19,7 +19,6 @@ export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
   create(
     @Body() createStudentDto: CreateStudentDto,
     @UploadedFile() image: any,

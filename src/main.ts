@@ -12,6 +12,8 @@ const start = async () => {
     const adapterHost = app.get(HttpAdapterHost);
     app.useGlobalFilters(new AllExceptionsFilter(adapterHost));
     app.use(cookieParser());
+    app.enableCors()
+    app.setGlobalPrefix('api/v1')
     app.useGlobalPipes(new ValidationPipe());
     const config = new DocumentBuilder()
       .setTitle('TEST')
