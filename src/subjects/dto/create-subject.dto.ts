@@ -6,9 +6,4 @@ export class CreateSubjectDto {
   @IsNotEmpty()
   @IsString()
   name: string;
-
-  @ApiProperty({ example: 'link', description: 'subject photo' })
-  @IsNotEmpty()
-  @IsString()
-  image: string;
 }

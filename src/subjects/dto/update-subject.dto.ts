@@ -6,9 +6,4 @@ export class UpdateSubjectDto {
   @IsOptional()
   @IsString()
   name: string;
-
-  @ApiProperty({ example: 'link', description: 'subject photo' })
-  @IsOptional()
-  @IsString()
-  image: string;
 }
