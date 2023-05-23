@@ -21,6 +21,9 @@ import { TestGroup } from './test_groups/entities/test_group.entity';
 import { TestResultsModule } from './test_results/test_results.module';
 import { TestResult } from './test_results/entities/test_result.entity';
 import {ServeStaticModule} from '@nestjs/serve-static'
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -56,10 +59,11 @@ import {ServeStaticModule} from '@nestjs/serve-static'
     TestGroupsModule,
     QuestionsModule,
     AnswersModule,
+    FilesModule,
     StudentsModule,
     TestResultsModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
