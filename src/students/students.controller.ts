@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
@@ -13,9 +14,11 @@ import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Student } from './entities/student.entity';
 import { LoginStudentDto } from './dto/Loginstudent.dto';
+import { Roles } from '../decorators/roles';
+import { RolesGuard } from '../guards/roles.guard';
 
 @Controller('students')
 @ApiTags('Students')
@@ -24,6 +27,9 @@ export class StudentsController {
 
   @ApiOperation({summary:"Create Student"})
   @ApiResponse({status:201,type:Student})
+  @ApiBearerAuth()
+  @Roles('2')
+  @UseGuards(RolesGuard)
   @Post()
   create(
     @Body() createStudentDto: CreateStudentDto,
