@@ -12,13 +12,14 @@ import {
   } from '@nestjs/common';
   import { AppService } from './app.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
   
   @Controller()
   @ApiTags('file-upload')
   export class AppController {
     constructor(private readonly appService: AppService) {}
     
+    @ApiConsumes('multipart/form-data')
     @UseInterceptors(FileInterceptor('image'))
     @Post('file-upload')
     createFile(@UploadedFile() image: string) {
