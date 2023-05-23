@@ -15,6 +15,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Student } from './entities/student.entity';
+import { LoginStudentDto } from './dto/Loginstudent.dto';
 
 @Controller('students')
 @ApiTags('Students')
@@ -60,5 +61,12 @@ export class StudentsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.studentsService.remove(+id);
+  }
+
+  @ApiOperation({summary:"Login student"})
+  @ApiResponse({status:200,type:"Access token"})
+  @Post('login')
+  loginStudent(@Body() loginStudentDto: LoginStudentDto) {
+    return this.studentsService.login(loginStudentDto);
   }
 }

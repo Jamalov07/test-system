@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable,HttpException,HttpStatus } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -7,6 +7,7 @@ import { FilesService } from '../files/files.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
+import { LoginStudentDto } from './dto/Loginstudent.dto';
 
 @Injectable()
 export class StudentsService {
@@ -92,7 +93,39 @@ async create(createStudentDto: CreateStudentDto,) {
     return { message: 'student deleted' };
   }
 
+  async login(loginStudentDto:LoginStudentDto) {
+    const {login,password } = loginStudentDto;
+    const check = await this.studentRepo.findOne({
+      where:{
+          username:login
+      }  
+    });
+    if(!check) {
+      throw new HttpException(
+        "Username is incorrect, Student not found",
+        HttpStatus.NOT_FOUND
+      )
+    }
 
+    const isEqual = await bcrypt.compare(password,check.password);
+    if(!isEqual) {
+      throw new HttpException(
+        "Password not matched",
+        HttpStatus.UNAUTHORIZED
+      )
+    };
+    let hashed = await bcrypt.hash(password,7);
+    await check.update({
+      password:hashed
+    })
+    await check.save()
+    const tokens = await this.getTokens(check.id,4);
+    return {
+      message:"Succesffuly signin",
+      data:check.id,
+      access_token:tokens.access_token
+    }
+  }
   async getTokens(id: number,role_id:number) {
     const jwtPayload = {
       id: id,
